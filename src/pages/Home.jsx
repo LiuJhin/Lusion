@@ -190,6 +190,39 @@ const Home = ({ renderer }) => {
     });
   };
 
+  // 手动触发作品部分动画
+  const triggerPortfolioAnimation = () => {
+    if (portfolioRefs.current && portfolioTitleRef.current) {
+      // 触发作品卡片动画
+      portfolioRefs.current.forEach((portfolio, index) => {
+        if (portfolio) {
+          gsap.fromTo(
+            portfolio,
+            { opacity: 0, y: 50, scale: 0.9 },
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: 1,
+              ease: "power2.out",
+              delay: index * 0.15,
+            }
+          );
+        }
+      });
+      
+      // 触发标题动画
+      setTimeout(() => {
+        animateTextReveal(portfolioTitleRef.current, 0);
+      }, 200);
+      
+      // 通知渲染器
+      if (renderer) {
+        renderer.onSectionVisible(3);
+      }
+    }
+  };
+
   // 处理鼠标移动
   const handleMouseMove = (e) => {
     // 计算归一化的鼠标位置 (-1 到 1 范围)
@@ -528,6 +561,10 @@ const Home = ({ renderer }) => {
               onClick={() => {
                 // 滚动到作品部分
                 portfolioRef.current.scrollIntoView({ behavior: 'smooth' });
+                // 延迟触发动画，等待滚动完成
+                setTimeout(() => {
+                  triggerPortfolioAnimation();
+                }, 800);
               }}
             >
               <span className="button-text">探索作品</span>
