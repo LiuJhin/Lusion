@@ -4,14 +4,16 @@
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   width: 100%;
   height: 100%;
   overflow-x: hidden;
   overflow-y: auto;
   background-color: #000;
   color: #fff;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
 }
 
 #root {
@@ -115,8 +117,12 @@ html, body {
 }
 
 @keyframes gradient {
-  0% { background-position: 0% center; }
-  100% { background-position: 200% center; }
+  0% {
+    background-position: 0% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
 }
 
 .hero-subtitle {
@@ -147,13 +153,18 @@ html, body {
 }
 
 .cta-button::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
   transition: all 0.5s ease;
 }
 
@@ -212,9 +223,19 @@ html, body {
 }
 
 @keyframes bounce {
-  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-  40% { transform: translateY(-10px); }
-  60% { transform: translateY(-5px); }
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
 }
 
 /* About Page Styles */
@@ -229,7 +250,11 @@ html, body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at 50% 50%, rgba(64, 128, 255, 0.1), transparent 70%);
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(64, 128, 255, 0.1),
+    transparent 70%
+  );
   pointer-events: none;
   z-index: -1;
 }
@@ -281,30 +306,50 @@ html, body {
 }
 
 .about-section::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(64, 128, 255, 0.05), rgba(128, 192, 255, 0.02));
+  background: linear-gradient(
+    135deg,
+    rgba(64, 128, 255, 0.05),
+    rgba(128, 192, 255, 0.02)
+  );
   z-index: -1;
 }
 
 .about-section-experience {
-  background: linear-gradient(135deg, rgba(64, 128, 255, 0.1), rgba(128, 192, 255, 0.05));
+  background: linear-gradient(
+    135deg,
+    rgba(64, 128, 255, 0.1),
+    rgba(128, 192, 255, 0.05)
+  );
 }
 
 .about-section-tech {
-  background: linear-gradient(135deg, rgba(128, 64, 255, 0.1), rgba(192, 128, 255, 0.05));
+  background: linear-gradient(
+    135deg,
+    rgba(128, 64, 255, 0.1),
+    rgba(192, 128, 255, 0.05)
+  );
 }
 
 .about-section-interaction {
-  background: linear-gradient(135deg, rgba(255, 128, 64, 0.1), rgba(255, 192, 128, 0.05));
+  background: linear-gradient(
+    135deg,
+    rgba(255, 128, 64, 0.1),
+    rgba(255, 192, 128, 0.05)
+  );
 }
 
 .about-section-performance {
-  background: linear-gradient(135deg, rgba(64, 255, 128, 0.1), rgba(128, 255, 192, 0.05));
+  background: linear-gradient(
+    135deg,
+    rgba(64, 255, 128, 0.1),
+    rgba(128, 255, 192, 0.05)
+  );
 }
 
 .about-title {
@@ -318,7 +363,7 @@ html, body {
 }
 
 .about-title::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -10px;
   left: 0;
@@ -387,8 +432,13 @@ html, body {
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-20px) rotate(2deg); }
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(2deg);
+  }
 }
 
 /* 标题装饰SVG */
@@ -539,7 +589,7 @@ html, body {
   .svg-background {
     opacity: 0.5;
   }
-  
+
   .features-decoration,
   .portfolio-decoration,
   .tech-decoration,
@@ -547,11 +597,11 @@ html, body {
   .cta-decoration {
     opacity: 0.3;
   }
-  
+
   .title-decoration {
     width: 90%;
   }
-  
+
   .feature-icon-bg {
     width: 60px;
     height: 60px;
@@ -563,19 +613,19 @@ html, body {
   .about-hero-title {
     font-size: 2.5rem;
   }
-  
+
   .about-hero-subtitle {
     font-size: 1.2rem;
   }
-  
+
   .about-title {
     font-size: 2rem;
   }
-  
+
   .about-text {
     font-size: 1rem;
   }
-  
+
   .about-section {
     padding: 2rem;
     margin-bottom: 4rem;
@@ -605,7 +655,7 @@ html, body {
 }
 
 .section-title::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -10px;
   left: 0;
@@ -641,7 +691,11 @@ html, body {
 .image-placeholder {
   width: 100%;
   aspect-ratio: 16/9;
-  background: linear-gradient(45deg, rgba(30, 60, 255, 0.2), rgba(80, 120, 255, 0.3));
+  background: linear-gradient(
+    45deg,
+    rgba(30, 60, 255, 0.2),
+    rgba(80, 120, 255, 0.3)
+  );
   border-radius: 10px;
   position: relative;
   overflow: hidden;
@@ -649,20 +703,29 @@ html, body {
 }
 
 .image-placeholder::before {
-  content: '';
+  content: "";
   position: absolute;
   top: -50%;
   left: -50%;
   width: 200%;
   height: 200%;
-  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  background: linear-gradient(
+    45deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
   transform: rotate(45deg);
   animation: shimmer 3s infinite;
 }
 
 @keyframes shimmer {
-  0% { transform: translateX(-100%) rotate(45deg); }
-  100% { transform: translateX(100%) rotate(45deg); }
+  0% {
+    transform: translateX(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(100%) rotate(45deg);
+  }
 }
 
 /* Features Section */
@@ -671,7 +734,12 @@ html, body {
   display: flex;
   align-items: center;
   padding: 6rem 2rem;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(20, 40, 100, 0.1), rgba(0, 0, 0, 0));
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0),
+    rgba(20, 40, 100, 0.1),
+    rgba(0, 0, 0, 0)
+  );
 }
 
 /* Flip Animation Controls */
@@ -829,33 +897,42 @@ html, body {
 
 .feature-details li:before,
 .tech-details li:before {
-  content: '•';
+  content: "•";
   position: absolute;
   left: 0;
   color: rgba(255, 255, 255, 0.5);
 }
 
 .feature-card::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at center, rgba(80, 120, 255, 0.1), transparent);
+  background: radial-gradient(
+    circle at center,
+    rgba(80, 120, 255, 0.1),
+    transparent
+  );
   opacity: 0;
   z-index: -1;
   transition: opacity 0.4s ease;
 }
 
 .feature-card::after {
-  content: '';
+  content: "";
   position: absolute;
   top: -50%;
   left: -50%;
   width: 200%;
   height: 200%;
-  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.03), transparent);
+  background: linear-gradient(
+    45deg,
+    transparent,
+    rgba(255, 255, 255, 0.03),
+    transparent
+  );
   transform: rotate(45deg);
   transition: all 0.8s ease;
   opacity: 0;
@@ -893,7 +970,7 @@ html, body {
 }
 
 .feature-icon::after {
-  content: '';
+  content: "";
   position: absolute;
   width: 100%;
   height: 100%;
@@ -944,13 +1021,17 @@ html, body {
 }
 
 .cta-section::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at center, rgba(40, 80, 255, 0.1), transparent 70%);
+  background: radial-gradient(
+    circle at center,
+    rgba(40, 80, 255, 0.1),
+    transparent 70%
+  );
   z-index: -1;
 }
 
@@ -1281,7 +1362,7 @@ html, body {
 }
 
 .loader::after {
-  content: '';
+  content: "";
   display: block;
   width: 60px;
   height: 2px;

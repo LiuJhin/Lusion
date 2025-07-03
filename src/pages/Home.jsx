@@ -21,7 +21,7 @@ const Home = ({ renderer }) => {
   const teamRefs = useRef([]);
   const ctaSectionRef = useRef(null);
   const footerRef = useRef(null);
-  
+
   // 文本动画相关的 refs
   const introTitleRef = useRef(null);
   const introTextRefs = useRef([]);
@@ -34,11 +34,11 @@ const Home = ({ renderer }) => {
 
   // 鼠标位置状态
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  
+
   // Flip 动画状态
   const [isFlipActive, setIsFlipActive] = useState(false);
-  const [currentLayout, setCurrentLayout] = useState('grid');
-  
+  const [currentLayout, setCurrentLayout] = useState("grid");
+
   // 为 Flip 动画添加 ref 引用
   const featureRefs = useRef([]);
   const portfolioRefs = useRef([]);
@@ -48,144 +48,146 @@ const Home = ({ renderer }) => {
   const splitTextIntoChars = (element) => {
     if (!element) return [];
     const text = element.textContent;
-    element.innerHTML = '';
+    element.innerHTML = "";
     const chars = [];
-    
+
     for (let i = 0; i < text.length; i++) {
       const char = text[i];
-      const span = document.createElement('span');
-      span.textContent = char === ' ' ? '\u00A0' : char;
-      span.style.display = 'inline-block';
-      span.style.opacity = '0';
-      span.style.transform = 'translateY(50px)';
+      const span = document.createElement("span");
+      span.textContent = char === " " ? "\u00A0" : char;
+      span.style.display = "inline-block";
+      span.style.opacity = "0";
+      span.style.transform = "translateY(50px)";
       element.appendChild(span);
       chars.push(span);
     }
-    
+
     return chars;
   };
 
   const animateTextReveal = (element, delay = 0) => {
     const chars = splitTextIntoChars(element);
-    
+
     gsap.to(chars, {
       opacity: 1,
       y: 0,
       duration: 0.8,
       ease: "power3.out",
       stagger: 0.03,
-      delay: delay
+      delay: delay,
     });
   };
 
   const animateTypewriter = (element, delay = 0) => {
     if (!element) return;
     const originalText = element.textContent;
-    element.textContent = '';
-    
+    element.textContent = "";
+
     gsap.to(element, {
       text: originalText,
       duration: originalText.length * 0.05,
       ease: "none",
-      delay: delay
+      delay: delay,
     });
   };
 
   const animateTextSlideUp = (element, delay = 0) => {
-     if (!element) return;
-     
-     gsap.fromTo(element, 
-       {
-         opacity: 0,
-         y: 30,
-         rotationX: 45
-       },
-       {
-         opacity: 1,
-         y: 0,
-         rotationX: 0,
-         duration: 1,
-         ease: "power3.out",
-         delay: delay
-       }
-     );
-   };
+    if (!element) return;
 
-   // Flip 动画辅助函数
-   const animateLayoutChange = (container, newLayout) => {
-     if (!container) return;
-     
-     setIsFlipActive(true);
-     
-     // 记录当前状态
-     const state = Flip.getState(container.children);
-     
-     // 改变布局
-     setCurrentLayout(newLayout);
-     
-     // 应用新的 CSS 类
-     container.className = container.className.replace(/layout-\w+/g, '') + ` layout-${newLayout}`;
-     
-     // 执行 Flip 动画
-     Flip.from(state, {
-       duration: 0.8,
-       ease: "power2.inOut",
-       stagger: 0.05,
-       onComplete: () => setIsFlipActive(false)
-     });
-   };
+    gsap.fromTo(
+      element,
+      {
+        opacity: 0,
+        y: 30,
+        rotationX: 45,
+      },
+      {
+        opacity: 1,
+        y: 0,
+        rotationX: 0,
+        duration: 1,
+        ease: "power3.out",
+        delay: delay,
+      }
+    );
+  };
 
-   const animateCardShuffle = (cards) => {
-     if (!cards || cards.length === 0) return;
-     
-     // 记录当前状态
-     const state = Flip.getState(cards);
-     
-     // 随机重新排列
-     const parent = cards[0].parentNode;
-     const shuffled = [...cards].sort(() => Math.random() - 0.5);
-     
-     shuffled.forEach(card => parent.appendChild(card));
-     
-     // 执行 Flip 动画
-     Flip.from(state, {
-       duration: 1,
-       ease: "power2.inOut",
-       stagger: 0.1
-     });
-   };
+  // Flip 动画辅助函数
+  const animateLayoutChange = (container, newLayout) => {
+    if (!container) return;
 
-   const animateCardExpand = (card) => {
-     if (!card) return;
-     
-     const state = Flip.getState(card);
-     
-     // 添加展开状态的类
-     card.classList.add('expanded');
-     
-     Flip.from(state, {
-       duration: 0.6,
-       ease: "power2.out",
-       scale: true,
-       simple: true
-     });
-   };
+    setIsFlipActive(true);
 
-   const animateCardCollapse = (card) => {
-     if (!card) return;
-     
-     const state = Flip.getState(card);
-     
-     // 移除展开状态的类
-     card.classList.remove('expanded');
-     
-     Flip.from(state, {
-       duration: 0.4,
-       ease: "power2.in",
-       scale: true,
-       simple: true
-     });
-   };
+    // 记录当前状态
+    const state = Flip.getState(container.children);
+
+    // 改变布局
+    setCurrentLayout(newLayout);
+
+    // 应用新的 CSS 类
+    container.className =
+      container.className.replace(/layout-\w+/g, "") + ` layout-${newLayout}`;
+
+    // 执行 Flip 动画
+    Flip.from(state, {
+      duration: 0.8,
+      ease: "power2.inOut",
+      stagger: 0.05,
+      onComplete: () => setIsFlipActive(false),
+    });
+  };
+
+  const animateCardShuffle = (cards) => {
+    if (!cards || cards.length === 0) return;
+
+    // 记录当前状态
+    const state = Flip.getState(cards);
+
+    // 随机重新排列
+    const parent = cards[0].parentNode;
+    const shuffled = [...cards].sort(() => Math.random() - 0.5);
+
+    shuffled.forEach((card) => parent.appendChild(card));
+
+    // 执行 Flip 动画
+    Flip.from(state, {
+      duration: 1,
+      ease: "power2.inOut",
+      stagger: 0.1,
+    });
+  };
+
+  const animateCardExpand = (card) => {
+    if (!card) return;
+
+    const state = Flip.getState(card);
+
+    // 添加展开状态的类
+    card.classList.add("expanded");
+
+    Flip.from(state, {
+      duration: 0.6,
+      ease: "power2.out",
+      scale: true,
+      simple: true,
+    });
+  };
+
+  const animateCardCollapse = (card) => {
+    if (!card) return;
+
+    const state = Flip.getState(card);
+
+    // 移除展开状态的类
+    card.classList.remove("expanded");
+
+    Flip.from(state, {
+      duration: 0.4,
+      ease: "power2.in",
+      scale: true,
+      simple: true,
+    });
+  };
 
   // 处理鼠标移动
   const handleMouseMove = (e) => {
@@ -214,18 +216,28 @@ const Home = ({ renderer }) => {
       // 设置标题立即可见，其他元素初始不可见
       gsap.set(titleRef.current, {
         opacity: 1,
-        y: 0
+        y: 0,
       });
       gsap.set([subtitleRef.current, ctaRef.current], {
         opacity: 0,
-        y: 20
+        y: 20,
       });
 
       heroTl
+        .to(
+          subtitleRef.current,
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            ease: "power3.out",
+          },
+          "-=0.5"
+        )
         .add(() => {
           // 副标题打字机效果
           animateTypewriter(subtitleRef.current, 0);
-        }, "-=0.5")
+        }, "-=0.3")
         .to(
           ctaRef.current,
           {
@@ -491,10 +503,10 @@ const Home = ({ renderer }) => {
       <section ref={heroRef} className="hero-section">
         <div className="hero-content">
           <h1 ref={titleRef} className="hero-title">
-            REACT LUSION
+            Rendered Just For You
           </h1>
           <p ref={subtitleRef} className="hero-subtitle">
-            创造未来感的沉浸式体验
+            创造像素里编织的故事
           </p>
           <button ref={ctaRef} className="cta-button">
             探索作品
@@ -533,37 +545,55 @@ const Home = ({ renderer }) => {
       {/* 5️⃣ Feature Section */}
       <section ref={featuresRef} className="features-section">
         <div className="section-content">
-          <h2 ref={featuresTitleRef} className="section-title">我们的核心能力</h2>
-          <div className="features-controls">
-            <button 
-              className={`layout-btn ${currentLayout === 'grid' ? 'active' : ''}`}
-              onClick={() => animateLayoutChange(document.querySelector('.features-container'), 'grid')}
+          <h2 ref={featuresTitleRef} className="section-title">
+            我们的核心能力
+          </h2>
+          {/* <div className="features-controls">
+            <button
+              className={`layout-btn ${
+                currentLayout === "grid" ? "active" : ""
+              }`}
+              onClick={() =>
+                animateLayoutChange(
+                  document.querySelector(".features-container"),
+                  "grid"
+                )
+              }
               disabled={isFlipActive}
             >
               网格布局
             </button>
-            <button 
-              className={`layout-btn ${currentLayout === 'list' ? 'active' : ''}`}
-              onClick={() => animateLayoutChange(document.querySelector('.features-container'), 'list')}
+            <button
+              className={`layout-btn ${
+                currentLayout === "list" ? "active" : ""
+              }`}
+              onClick={() =>
+                animateLayoutChange(
+                  document.querySelector(".features-container"),
+                  "list"
+                )
+              }
               disabled={isFlipActive}
             >
               列表布局
             </button>
-            <button 
+            <button
               className="shuffle-btn"
-              onClick={() => animateCardShuffle(featureRefs.current.filter(Boolean))}
+              onClick={() =>
+                animateCardShuffle(featureRefs.current.filter(Boolean))
+              }
               disabled={isFlipActive}
             >
               重新排列
             </button>
-          </div>
+          </div> */}
           <div className={`features-container layout-${currentLayout}`}>
             <div
               ref={(el) => (featureRefs.current[0] = el)}
               className="feature-card"
               onClick={(e) => {
                 const card = e.currentTarget;
-                if (card.classList.contains('expanded')) {
+                if (card.classList.contains("expanded")) {
                   animateCardCollapse(card);
                 } else {
                   animateCardExpand(card);
@@ -578,7 +608,9 @@ const Home = ({ renderer }) => {
                 创造引人入胜的互动体验，通过WebGL和3D技术打造视觉震撼的数字世界。
               </p>
               <div className="feature-details">
-                <p>我们使用最新的WebGL技术和Three.js框架，创造出令人惊叹的3D视觉效果。从粒子系统到复杂的几何体动画，每一个细节都经过精心设计。</p>
+                <p>
+                  我们使用最新的WebGL技术和Three.js框架，创造出令人惊叹的3D视觉效果。从粒子系统到复杂的几何体动画，每一个细节都经过精心设计。
+                </p>
                 <ul>
                   <li>实时3D渲染</li>
                   <li>粒子效果系统</li>
@@ -593,7 +625,7 @@ const Home = ({ renderer }) => {
               className="feature-card"
               onClick={(e) => {
                 const card = e.currentTarget;
-                if (card.classList.contains('expanded')) {
+                if (card.classList.contains("expanded")) {
                   animateCardCollapse(card);
                 } else {
                   animateCardExpand(card);
@@ -608,7 +640,9 @@ const Home = ({ renderer }) => {
                 突破传统界限的设计理念，将艺术与技术融合，创造独特的品牌视觉语言。
               </p>
               <div className="feature-details">
-                <p>我们的设计团队拥有丰富的视觉设计经验，擅长将抽象概念转化为具体的视觉表达。每个项目都是独一无二的艺术品。</p>
+                <p>
+                  我们的设计团队拥有丰富的视觉设计经验，擅长将抽象概念转化为具体的视觉表达。每个项目都是独一无二的艺术品。
+                </p>
                 <ul>
                   <li>品牌视觉设计</li>
                   <li>UI/UX 界面设计</li>
@@ -623,7 +657,7 @@ const Home = ({ renderer }) => {
               className="feature-card"
               onClick={(e) => {
                 const card = e.currentTarget;
-                if (card.classList.contains('expanded')) {
+                if (card.classList.contains("expanded")) {
                   animateCardCollapse(card);
                 } else {
                   animateCardExpand(card);
@@ -638,7 +672,9 @@ const Home = ({ renderer }) => {
                 保证复杂视觉效果下的流畅体验，通过精细优化确保各种设备上的出色表现。
               </p>
               <div className="feature-details">
-                <p>性能优化是我们的核心竞争力之一。我们使用先进的优化技术，确保即使在复杂的3D场景中也能保持60fps的流畅体验。</p>
+                <p>
+                  性能优化是我们的核心竞争力之一。我们使用先进的优化技术，确保即使在复杂的3D场景中也能保持60fps的流畅体验。
+                </p>
                 <ul>
                   <li>代码分割与懒加载</li>
                   <li>GPU 加速渲染</li>
@@ -654,37 +690,55 @@ const Home = ({ renderer }) => {
       {/* 6️⃣ Portfolio Section */}
       <section ref={portfolioRef} className="portfolio-section">
         <div className="section-content">
-          <h2 ref={portfolioTitleRef} className="section-title">精选作品</h2>
-          <div className="portfolio-controls">
-            <button 
-              className={`layout-btn ${currentLayout === 'grid' ? 'active' : ''}`}
-              onClick={() => animateLayoutChange(document.querySelector('.portfolio-container'), 'grid')}
+          <h2 ref={portfolioTitleRef} className="section-title">
+            精选作品
+          </h2>
+          {/* <div className="portfolio-controls">
+            <button
+              className={`layout-btn ${
+                currentLayout === "grid" ? "active" : ""
+              }`}
+              onClick={() =>
+                animateLayoutChange(
+                  document.querySelector(".portfolio-container"),
+                  "grid"
+                )
+              }
               disabled={isFlipActive}
             >
               网格视图
             </button>
-            <button 
-              className={`layout-btn ${currentLayout === 'masonry' ? 'active' : ''}`}
-              onClick={() => animateLayoutChange(document.querySelector('.portfolio-container'), 'masonry')}
+            <button
+              className={`layout-btn ${
+                currentLayout === "masonry" ? "active" : ""
+              }`}
+              onClick={() =>
+                animateLayoutChange(
+                  document.querySelector(".portfolio-container"),
+                  "masonry"
+                )
+              }
               disabled={isFlipActive}
             >
               瀑布流
             </button>
-            <button 
+            <button
               className="shuffle-btn"
-              onClick={() => animateCardShuffle(portfolioRefs.current.filter(Boolean))}
+              onClick={() =>
+                animateCardShuffle(portfolioRefs.current.filter(Boolean))
+              }
               disabled={isFlipActive}
             >
               重新排列
             </button>
-          </div>
+          </div> */}
           <div className={`portfolio-container layout-${currentLayout}`}>
             <div
               ref={(el) => (portfolioRefs.current[0] = el)}
               className="portfolio-item"
               onClick={(e) => {
                 const item = e.currentTarget;
-                if (item.classList.contains('expanded')) {
+                if (item.classList.contains("expanded")) {
                   animateCardCollapse(item);
                 } else {
                   animateCardExpand(item);
@@ -702,7 +756,9 @@ const Home = ({ renderer }) => {
               <div className="portfolio-details">
                 <div className="project-info">
                   <h5>项目详情</h5>
-                  <p>这是一个为国际知名品牌设计的沉浸式3D体验项目。通过WebGL技术实现了流畅的3D场景切换和交互效果。</p>
+                  <p>
+                    这是一个为国际知名品牌设计的沉浸式3D体验项目。通过WebGL技术实现了流畅的3D场景切换和交互效果。
+                  </p>
                   <div className="tech-stack">
                     <span className="tech-tag">Three.js</span>
                     <span className="tech-tag">GSAP</span>
@@ -717,7 +773,7 @@ const Home = ({ renderer }) => {
               className="portfolio-item"
               onClick={(e) => {
                 const item = e.currentTarget;
-                if (item.classList.contains('expanded')) {
+                if (item.classList.contains("expanded")) {
                   animateCardCollapse(item);
                 } else {
                   animateCardExpand(item);
@@ -735,7 +791,9 @@ const Home = ({ renderer }) => {
               <div className="portfolio-details">
                 <div className="project-info">
                   <h5>项目详情</h5>
-                  <p>这是一个结合了传感器技术的互动艺术装置项目。观众的动作会实时影响屏幕上的视觉效果，创造独特的互动体验。</p>
+                  <p>
+                    这是一个结合了传感器技术的互动艺术装置项目。观众的动作会实时影响屏幕上的视觉效果，创造独特的互动体验。
+                  </p>
                   <div className="tech-stack">
                     <span className="tech-tag">React</span>
                     <span className="tech-tag">WebRTC</span>
@@ -750,7 +808,7 @@ const Home = ({ renderer }) => {
               className="portfolio-item"
               onClick={(e) => {
                 const item = e.currentTarget;
-                if (item.classList.contains('expanded')) {
+                if (item.classList.contains("expanded")) {
                   animateCardCollapse(item);
                 } else {
                   animateCardExpand(item);
@@ -768,7 +826,9 @@ const Home = ({ renderer }) => {
               <div className="portfolio-details">
                 <div className="project-info">
                   <h5>项目详情</h5>
-                  <p>为企业客户打造的虚拟展厅解决方案。用户可以在3D空间中自由漫游，查看产品详情，获得沉浸式的展示体验。</p>
+                  <p>
+                    为企业客户打造的虚拟展厅解决方案。用户可以在3D空间中自由漫游，查看产品详情，获得沉浸式的展示体验。
+                  </p>
                   <div className="tech-stack">
                     <span className="tech-tag">Three.js</span>
                     <span className="tech-tag">Blender</span>
@@ -784,11 +844,15 @@ const Home = ({ renderer }) => {
       {/* 7️⃣ Technology Stack Section */}
       <section ref={techRef} className="tech-section">
         <div className="section-content">
-          <h2 ref={techTitleRef} className="section-title">技术栈</h2>
+          <h2 ref={techTitleRef} className="section-title">
+            技术栈
+          </h2>
           <div className="tech-controls">
-            <button 
+            <button
               className="shuffle-btn"
-              onClick={() => animateCardShuffle(techRefs.current.filter(Boolean))}
+              onClick={() =>
+                animateCardShuffle(techRefs.current.filter(Boolean))
+              }
               disabled={isFlipActive}
             >
               重新排列技术
@@ -803,7 +867,7 @@ const Home = ({ renderer }) => {
                   className="tech-item"
                   onClick={(e) => {
                     const item = e.currentTarget;
-                    if (item.classList.contains('expanded')) {
+                    if (item.classList.contains("expanded")) {
                       animateCardCollapse(item);
                     } else {
                       animateCardExpand(item);
@@ -826,7 +890,7 @@ const Home = ({ renderer }) => {
                   className="tech-item"
                   onClick={(e) => {
                     const item = e.currentTarget;
-                    if (item.classList.contains('expanded')) {
+                    if (item.classList.contains("expanded")) {
                       animateCardCollapse(item);
                     } else {
                       animateCardExpand(item);
@@ -849,7 +913,7 @@ const Home = ({ renderer }) => {
                   className="tech-item"
                   onClick={(e) => {
                     const item = e.currentTarget;
-                    if (item.classList.contains('expanded')) {
+                    if (item.classList.contains("expanded")) {
                       animateCardCollapse(item);
                     } else {
                       animateCardExpand(item);
@@ -878,7 +942,7 @@ const Home = ({ renderer }) => {
                   className="tech-item"
                   onClick={(e) => {
                     const item = e.currentTarget;
-                    if (item.classList.contains('expanded')) {
+                    if (item.classList.contains("expanded")) {
                       animateCardCollapse(item);
                     } else {
                       animateCardExpand(item);
@@ -901,7 +965,7 @@ const Home = ({ renderer }) => {
                   className="tech-item"
                   onClick={(e) => {
                     const item = e.currentTarget;
-                    if (item.classList.contains('expanded')) {
+                    if (item.classList.contains("expanded")) {
                       animateCardCollapse(item);
                     } else {
                       animateCardExpand(item);
@@ -924,7 +988,7 @@ const Home = ({ renderer }) => {
                   className="tech-item"
                   onClick={(e) => {
                     const item = e.currentTarget;
-                    if (item.classList.contains('expanded')) {
+                    if (item.classList.contains("expanded")) {
                       animateCardCollapse(item);
                     } else {
                       animateCardExpand(item);
@@ -953,7 +1017,7 @@ const Home = ({ renderer }) => {
                   className="tech-item"
                   onClick={(e) => {
                     const item = e.currentTarget;
-                    if (item.classList.contains('expanded')) {
+                    if (item.classList.contains("expanded")) {
                       animateCardCollapse(item);
                     } else {
                       animateCardExpand(item);
@@ -976,7 +1040,7 @@ const Home = ({ renderer }) => {
                   className="tech-item"
                   onClick={(e) => {
                     const item = e.currentTarget;
-                    if (item.classList.contains('expanded')) {
+                    if (item.classList.contains("expanded")) {
                       animateCardCollapse(item);
                     } else {
                       animateCardExpand(item);
@@ -999,7 +1063,7 @@ const Home = ({ renderer }) => {
                   className="tech-item"
                   onClick={(e) => {
                     const item = e.currentTarget;
-                    if (item.classList.contains('expanded')) {
+                    if (item.classList.contains("expanded")) {
                       animateCardCollapse(item);
                     } else {
                       animateCardExpand(item);
@@ -1026,7 +1090,9 @@ const Home = ({ renderer }) => {
       {/*  Team Section */}
       <section ref={teamRef} className="team-section">
         <div className="section-content">
-          <h2 ref={teamTitleRef} className="section-title">创意团队</h2>
+          <h2 ref={teamTitleRef} className="section-title">
+            创意团队
+          </h2>
           <div className="team-container">
             <div
               ref={(el) => (teamRefs.current[0] = el)}
@@ -1070,8 +1136,12 @@ const Home = ({ renderer }) => {
       {/* 6️⃣ Call To Action Section */}
       <section ref={ctaSectionRef} className="cta-section">
         <div className="section-content">
-          <h2 ref={ctaTitleRef} className="cta-title">准备好开始您的项目了吗？</h2>
-          <p ref={ctaTextRef} className="cta-text">让我们一起创造令人惊叹的数字体验</p>
+          <h2 ref={ctaTitleRef} className="cta-title">
+            准备好开始您的项目了吗？
+          </h2>
+          <p ref={ctaTextRef} className="cta-text">
+            让我们一起创造令人惊叹的数字体验
+          </p>
           <button className="cta-button cta-button-large">开始项目</button>
         </div>
       </section>
