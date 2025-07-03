@@ -210,12 +210,12 @@ const Home = ({ renderer }) => {
           );
         }
       });
-      
+
       // 触发标题动画
       setTimeout(() => {
         animateTextReveal(portfolioTitleRef.current, 0);
       }, 200);
-      
+
       // 通知渲染器
       if (renderer) {
         renderer.onSectionVisible(3);
@@ -239,6 +239,70 @@ const Home = ({ renderer }) => {
   useEffect(() => {
     // 添加鼠标移动事件监听器
     window.addEventListener("mousemove", handleMouseMove);
+
+    // Knowledge filter functionality
+    const filterTabs = document.querySelectorAll('.filter-tab');
+    const knowledgeItems = document.querySelectorAll('.knowledge-item');
+    
+    const handleFilterClick = (e) => {
+      const category = e.target.dataset.category;
+      
+      // Update active tab
+      filterTabs.forEach(tab => tab.classList.remove('active'));
+      e.target.classList.add('active');
+      
+      // Filter items with animation
+      knowledgeItems.forEach((item, index) => {
+        const itemCategory = item.dataset.category;
+        const shouldShow = category === 'all' || itemCategory === category;
+        
+        if (shouldShow) {
+          gsap.to(item, {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 0.4,
+            delay: index * 0.1,
+            ease: "power2.out"
+          });
+          item.style.display = 'block';
+        } else {
+          gsap.to(item, {
+            opacity: 0,
+            y: 20,
+            scale: 0.95,
+            duration: 0.3,
+            ease: "power2.in",
+            onComplete: () => {
+              item.style.display = 'none';
+            }
+          });
+        }
+      });
+    };
+    
+    const handleBookmarkClick = (e) => {
+      e.stopPropagation();
+      const btn = e.currentTarget;
+      btn.classList.toggle('bookmarked');
+      
+      // Update icon
+      const icon = btn.querySelector('i');
+      if (btn.classList.contains('bookmarked')) {
+        icon.className = 'fas fa-bookmark';
+      } else {
+        icon.className = 'far fa-bookmark';
+      }
+    };
+    
+    filterTabs.forEach(tab => {
+      tab.addEventListener('click', handleFilterClick);
+    });
+    
+    const bookmarkBtns = document.querySelectorAll('.bookmark-btn');
+    bookmarkBtns.forEach(btn => {
+      btn.addEventListener('click', handleBookmarkClick);
+    });
 
     if (renderer && renderer.isInitialized) {
       // 确保WebGL渲染器已经初始化
@@ -533,6 +597,15 @@ const Home = ({ renderer }) => {
       // 清理事件监听器
       window.removeEventListener("mousemove", handleMouseMove);
 
+      // 清理知识库过滤器事件监听器
+      filterTabs.forEach(tab => {
+        tab.removeEventListener('click', handleFilterClick);
+      });
+      const bookmarkBtns = document.querySelectorAll('.bookmark-btn');
+      bookmarkBtns.forEach(btn => {
+        btn.removeEventListener('click', handleBookmarkClick);
+      });
+
       // 清理ScrollTrigger
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
 
@@ -555,12 +628,12 @@ const Home = ({ renderer }) => {
             创造像素里编织的故事
           </p>
           <div className="cta-buttons">
-            <button 
-              ref={ctaRef} 
+            <button
+              ref={ctaRef}
               className="cta-button primary"
               onClick={() => {
                 // 滚动到作品部分
-                portfolioRef.current.scrollIntoView({ behavior: 'smooth' });
+                portfolioRef.current.scrollIntoView({ behavior: "smooth" });
                 // 延迟触发动画，等待滚动完成
                 setTimeout(() => {
                   triggerPortfolioAnimation();
@@ -570,8 +643,8 @@ const Home = ({ renderer }) => {
               <span className="button-text">探索作品</span>
               <span className="button-icon">→</span>
             </button>
-            <button 
-              ref={contactRef} 
+            <button
+              ref={contactRef}
               className="cta-button secondary"
               onClick={() => {
                 // 显示联系表单或模态框
@@ -1158,69 +1231,119 @@ const Home = ({ renderer }) => {
         </div>
       </section>
 
-      {/* About Me Section */}
-      <section ref={teamRef} className="about-me-section">
+      {/* Knowledge Base Section */}
+      <section ref={teamRef} className="knowledge-section">
         <div className="section-content">
-          <h2 ref={teamTitleRef} className="section-title">
-            关于我
-          </h2>
-          <div className="about-me-container">
-            <div
+          <div className="knowledge-header">
+            <h2 ref={teamTitleRef} className="section-title">
+              知识沉淀
+            </h2>
+            <p className="knowledge-subtitle">
+              记录思考轨迹，沉淀技术心得，分享创作灵感
+            </p>
+          </div>
+          
+          <div className="knowledge-filters">
+            <div className="filter-tabs">
+              <button className="filter-tab active" data-category="all">
+                全部
+              </button>
+              <button className="filter-tab" data-category="frontend">
+                前端技术
+              </button>
+              <button className="filter-tab" data-category="webgl">
+                WebGL & 3D
+              </button>
+              <button className="filter-tab" data-category="design">
+                设计思考
+              </button>
+              <button className="filter-tab" data-category="tools">
+                工具分享
+              </button>
+            </div>
+          </div>
+
+          <div className="knowledge-list">
+            <article
               ref={(el) => (teamRefs.current[0] = el)}
-              className="about-me-card main-card"
+              className="knowledge-item"
+              data-category="webgl"
             >
-              <div className="profile-section">
-                <div className="profile-avatar">
-                  <div className="avatar-placeholder">
-                    <i className="fas fa-user"></i>
-                  </div>
-                </div>
-                <div className="profile-info">
-                  <h3>独立开发者</h3>
-                  <p className="profile-title">全栈工程师 & 创意设计师</p>
-                  <p className="profile-desc">
-                    热爱创造具有未来感的数字体验，专注于WebGL、React和创意编程的结合。
-                    从概念设计到技术实现，独立完成整个项目的开发流程。
-                  </p>
+              <div className="item-header">
+                <h3 className="item-title">WebGL 着色器编程实战指南</h3>
+                <div className="item-meta">
+                  <span className="reading-time">8 分钟阅读</span>
+                  <time className="update-time">2024-01-15</time>
                 </div>
               </div>
-            </div>
-
-            <div
-              ref={(el) => (teamRefs.current[1] = el)}
-              className="about-me-card skills-card"
-            >
-              <div className="card-icon">
-                <i className="fas fa-code"></i>
-              </div>
-              <h4>技术专长</h4>
-              <ul className="skills-list">
-                <li>前端开发 (React, Vue, TypeScript)</li>
-                <li>WebGL & 3D 图形编程</li>
-                <li>创意编程 & 数字艺术</li>
-                <li>UI/UX 设计</li>
-                <li>性能优化 & 用户体验</li>
-              </ul>
-            </div>
-
-            <div
-              ref={(el) => (teamRefs.current[2] = el)}
-              className="about-me-card experience-card"
-            >
-              <div className="card-icon">
-                <i className="fas fa-lightbulb"></i>
-              </div>
-              <h4>设计理念</h4>
-              <p className="philosophy-text">
-                相信技术与艺术的完美融合能够创造出令人惊叹的数字体验。
-                每一个项目都是一次探索的旅程，追求创新、美感与实用性的平衡。
+              <p className="item-description">
+                深入探讨 WebGL 着色器的编写技巧，从基础语法到高级特效实现，包含多个实际案例和性能优化建议。
               </p>
-              <div className="philosophy-tags">
-                <span className="tag">创新思维</span>
-                <span className="tag">用户至上</span>
-                <span className="tag">技术驱动</span>
+              <div className="item-tags">
+                <span className="tag">WebGL</span>
+                <span className="tag">GLSL</span>
+                <span className="tag">3D图形</span>
               </div>
-            </div>
+              <div className="item-actions">
+                <button className="bookmark-btn">
+                  <i className="far fa-bookmark"></i>
+                </button>
+              </div>
+            </article>
+
+            <article
+              ref={(el) => (teamRefs.current[1] = el)}
+              className="knowledge-item"
+              data-category="frontend"
+            >
+              <div className="item-header">
+                <h3 className="item-title">React 性能优化的十个最佳实践</h3>
+                <div className="item-meta">
+                  <span className="reading-time">12 分钟阅读</span>
+                  <time className="update-time">2024-01-10</time>
+                </div>
+              </div>
+              <p className="item-description">
+                总结在大型 React 项目中的性能优化经验，涵盖组件优化、状态管理、代码分割等关键技术点。
+              </p>
+              <div className="item-tags">
+                <span className="tag">React</span>
+                <span className="tag">性能优化</span>
+                <span className="tag">最佳实践</span>
+              </div>
+              <div className="item-actions">
+                <button className="bookmark-btn bookmarked">
+                  <i className="fas fa-bookmark"></i>
+                </button>
+              </div>
+            </article>
+
+            <article
+              ref={(el) => (teamRefs.current[2] = el)}
+              className="knowledge-item"
+              data-category="design"
+            >
+              <div className="item-header">
+                <h3 className="item-title">交互设计中的微动效应用</h3>
+                <div className="item-meta">
+                  <span className="reading-time">6 分钟阅读</span>
+                  <time className="update-time">2024-01-05</time>
+                </div>
+              </div>
+              <p className="item-description">
+                探讨如何通过精心设计的微动效提升用户体验，分析成功案例并提供实现思路。
+              </p>
+              <div className="item-tags">
+                <span className="tag">交互设计</span>
+                <span className="tag">动效</span>
+                <span className="tag">用户体验</span>
+              </div>
+              <div className="item-actions">
+                <button className="bookmark-btn">
+                  <i className="far fa-bookmark"></i>
+                </button>
+              </div>
+            </article>
           </div>
         </div>
       </section>
