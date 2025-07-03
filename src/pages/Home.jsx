@@ -12,6 +12,7 @@ const Home = ({ renderer }) => {
   const titleRef = useRef(null);
   const subtitleRef = useRef(null);
   const ctaRef = useRef(null);
+  const contactRef = useRef(null);
   const scrollIndicatorRef = useRef(null);
   const introRef = useRef(null);
   const featuresRef = useRef(null);
@@ -218,7 +219,7 @@ const Home = ({ renderer }) => {
         opacity: 1,
         y: 0,
       });
-      gsap.set([subtitleRef.current, ctaRef.current], {
+      gsap.set([subtitleRef.current, ctaRef.current, contactRef.current], {
         opacity: 0,
         y: 20,
       });
@@ -243,10 +244,22 @@ const Home = ({ renderer }) => {
           {
             opacity: 1,
             y: 0,
-            duration: 1,
-            ease: "power3.out",
+            scale: 1,
+            duration: 0.8,
+            ease: "back.out(1.7)",
           },
-          "-=0.8"
+          "-=0.6"
+        )
+        .to(
+          contactRef.current,
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 0.8,
+            ease: "back.out(1.7)",
+          },
+          "-=0.6"
         )
         .to(
           scrollIndicatorRef.current,
@@ -508,9 +521,30 @@ const Home = ({ renderer }) => {
           <p ref={subtitleRef} className="hero-subtitle">
             创造像素里编织的故事
           </p>
-          <button ref={ctaRef} className="cta-button">
-            探索作品
-          </button>
+          <div className="cta-buttons">
+            <button 
+              ref={ctaRef} 
+              className="cta-button primary"
+              onClick={() => {
+                // 滚动到作品部分
+                portfolioRef.current.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
+              <span className="button-text">探索作品</span>
+              <span className="button-icon">→</span>
+            </button>
+            <button 
+              ref={contactRef} 
+              className="cta-button secondary"
+              onClick={() => {
+                // 显示联系表单或模态框
+                alert("联系我们功能即将上线！");
+              }}
+            >
+              <span className="button-text">联系我们</span>
+              <span className="button-icon">✉</span>
+            </button>
+          </div>
         </div>
 
         {/* 3️⃣ Scroll Down 提示 */}
@@ -1150,7 +1184,7 @@ const Home = ({ renderer }) => {
       <footer ref={footerRef} className="footer">
         <div className="footer-content">
           <div className="copyright">
-            © 2023 React Lusion. All Rights Reserved.
+            © 2025 Pixel Poem. All Rights Reserved.
           </div>
           <div className="social-links">
             <a href="#" className="social-link">
