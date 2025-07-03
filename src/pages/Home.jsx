@@ -1158,47 +1158,68 @@ const Home = ({ renderer }) => {
         </div>
       </section>
 
-      {/*  Team Section */}
-      <section ref={teamRef} className="team-section">
+      {/* About Me Section */}
+      <section ref={teamRef} className="about-me-section">
         <div className="section-content">
           <h2 ref={teamTitleRef} className="section-title">
-            创意团队
+            关于我
           </h2>
-          <div className="team-container">
+          <div className="about-me-container">
             <div
               ref={(el) => (teamRefs.current[0] = el)}
-              className="team-member"
+              className="about-me-card main-card"
             >
-              <div className="member-avatar">
-                <div className="avatar-placeholder"></div>
+              <div className="profile-section">
+                <div className="profile-avatar">
+                  <div className="avatar-placeholder">
+                    <i className="fas fa-user"></i>
+                  </div>
+                </div>
+                <div className="profile-info">
+                  <h3>独立开发者</h3>
+                  <p className="profile-title">全栈工程师 & 创意设计师</p>
+                  <p className="profile-desc">
+                    热爱创造具有未来感的数字体验，专注于WebGL、React和创意编程的结合。
+                    从概念设计到技术实现，独立完成整个项目的开发流程。
+                  </p>
+                </div>
               </div>
-              <h3>Alex Chen</h3>
-              <p className="member-role">创意总监</p>
-              <p className="member-desc">专注于数字艺术与交互设计的融合创新</p>
             </div>
 
             <div
               ref={(el) => (teamRefs.current[1] = el)}
-              className="team-member"
+              className="about-me-card skills-card"
             >
-              <div className="member-avatar">
-                <div className="avatar-placeholder"></div>
+              <div className="card-icon">
+                <i className="fas fa-code"></i>
               </div>
-              <h3>Sarah Kim</h3>
-              <p className="member-role">技术架构师</p>
-              <p className="member-desc">WebGL与3D技术的深度实践者</p>
+              <h4>技术专长</h4>
+              <ul className="skills-list">
+                <li>前端开发 (React, Vue, TypeScript)</li>
+                <li>WebGL & 3D 图形编程</li>
+                <li>创意编程 & 数字艺术</li>
+                <li>UI/UX 设计</li>
+                <li>性能优化 & 用户体验</li>
+              </ul>
             </div>
 
             <div
               ref={(el) => (teamRefs.current[2] = el)}
-              className="team-member"
+              className="about-me-card experience-card"
             >
-              <div className="member-avatar">
-                <div className="avatar-placeholder"></div>
+              <div className="card-icon">
+                <i className="fas fa-lightbulb"></i>
               </div>
-              <h3>David Liu</h3>
-              <p className="member-role">前端工程师</p>
-              <p className="member-desc">追求极致性能与用户体验的完美平衡</p>
+              <h4>设计理念</h4>
+              <p className="philosophy-text">
+                相信技术与艺术的完美融合能够创造出令人惊叹的数字体验。
+                每一个项目都是一次探索的旅程，追求创新、美感与实用性的平衡。
+              </p>
+              <div className="philosophy-tags">
+                <span className="tag">创新思维</span>
+                <span className="tag">用户至上</span>
+                <span className="tag">技术驱动</span>
+              </div>
             </div>
           </div>
         </div>
