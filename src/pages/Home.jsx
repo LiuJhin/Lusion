@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { TextPlugin } from "gsap/TextPlugin";
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, TextPlugin);
 
 const Home = ({ renderer }) => {
   const homeRef = useRef(null);
@@ -22,9 +23,86 @@ const Home = ({ renderer }) => {
   const teamRefs = useRef([]);
   const ctaSectionRef = useRef(null);
   const footerRef = useRef(null);
+  
+  // 文本动画相关的 refs
+  const introTitleRef = useRef(null);
+  const introTextRefs = useRef([]);
+  const featuresTitleRef = useRef(null);
+  const portfolioTitleRef = useRef(null);
+  const techTitleRef = useRef(null);
+  const teamTitleRef = useRef(null);
+  const ctaTitleRef = useRef(null);
+  const ctaTextRef = useRef(null);
 
   // 鼠标位置状态
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  // 文本动画辅助函数
+  const splitTextIntoChars = (element) => {
+    if (!element) return [];
+    const text = element.textContent;
+    element.innerHTML = '';
+    const chars = [];
+    
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      const span = document.createElement('span');
+      span.textContent = char === ' ' ? '\u00A0' : char;
+      span.style.display = 'inline-block';
+      span.style.opacity = '0';
+      span.style.transform = 'translateY(50px)';
+      element.appendChild(span);
+      chars.push(span);
+    }
+    
+    return chars;
+  };
+
+  const animateTextReveal = (element, delay = 0) => {
+    const chars = splitTextIntoChars(element);
+    
+    gsap.to(chars, {
+      opacity: 1,
+      y: 0,
+      duration: 0.8,
+      ease: "power3.out",
+      stagger: 0.03,
+      delay: delay
+    });
+  };
+
+  const animateTypewriter = (element, delay = 0) => {
+    if (!element) return;
+    const originalText = element.textContent;
+    element.textContent = '';
+    
+    gsap.to(element, {
+      text: originalText,
+      duration: originalText.length * 0.05,
+      ease: "none",
+      delay: delay
+    });
+  };
+
+  const animateTextSlideUp = (element, delay = 0) => {
+    if (!element) return;
+    
+    gsap.fromTo(element, 
+      {
+        opacity: 0,
+        y: 30,
+        rotationX: 45
+      },
+      {
+        opacity: 1,
+        y: 0,
+        rotationX: 0,
+        duration: 1,
+        ease: "power3.out",
+        delay: delay
+      }
+    );
+  };
 
   // 处理鼠标移动
   const handleMouseMove = (e) => {
@@ -50,23 +128,20 @@ const Home = ({ renderer }) => {
       // Hero 部分元素的入场动画
       const heroTl = gsap.timeline({ delay: 0.5 });
 
+      // 先设置初始状态
+      gsap.set([titleRef.current, subtitleRef.current, ctaRef.current], {
+        opacity: 1
+      });
+
       heroTl
-        .to(titleRef.current, {
-          opacity: 1,
-          y: 0,
-          duration: 1.2,
-          ease: "power3.out",
+        .add(() => {
+          // 标题文字逐字显示动画
+          animateTextReveal(titleRef.current, 0);
         })
-        .to(
-          subtitleRef.current,
-          {
-            opacity: 1,
-            y: 0,
-            duration: 1.2,
-            ease: "power3.out",
-          },
-          "-=0.8"
-        )
+        .add(() => {
+          // 副标题打字机效果
+          animateTypewriter(subtitleRef.current, 0);
+        }, "-=0.5")
         .to(
           ctaRef.current,
           {
@@ -121,6 +196,15 @@ const Home = ({ renderer }) => {
               if (renderer) {
                 renderer.onSectionVisible(1);
               }
+              // 触发文本动画
+              setTimeout(() => {
+                animateTextReveal(introTitleRef.current, 0);
+                introTextRefs.current.forEach((textEl, index) => {
+                  if (textEl) {
+                    animateTextSlideUp(textEl, index * 0.2);
+                  }
+                });
+              }, 300);
             },
           },
         }
@@ -145,6 +229,12 @@ const Home = ({ renderer }) => {
               onEnter: () => {
                 if (renderer) {
                   renderer.onSectionVisible(2);
+                }
+                // 触发标题文本动画
+                if (index === 0) {
+                  setTimeout(() => {
+                    animateTypewriter(featuresTitleRef.current, 0);
+                  }, 200);
                 }
               },
             },
@@ -173,6 +263,12 @@ const Home = ({ renderer }) => {
                 if (renderer) {
                   renderer.onSectionVisible(3);
                 }
+                // 触发标题文本动画
+                if (index === 0) {
+                  setTimeout(() => {
+                    animateTextReveal(portfolioTitleRef.current, 0);
+                  }, 200);
+                }
               },
             },
           }
@@ -199,6 +295,12 @@ const Home = ({ renderer }) => {
               onEnter: () => {
                 if (renderer) {
                   renderer.onSectionVisible(4);
+                }
+                // 触发标题文本动画
+                if (index === 0) {
+                  setTimeout(() => {
+                    animateTextSlideUp(techTitleRef.current, 0);
+                  }, 200);
                 }
               },
             },
@@ -227,6 +329,12 @@ const Home = ({ renderer }) => {
                 if (renderer) {
                   renderer.onSectionVisible(5);
                 }
+                // 触发标题文本动画
+                if (index === 0) {
+                  setTimeout(() => {
+                    animateTypewriter(teamTitleRef.current, 0);
+                  }, 200);
+                }
               },
             },
           }
@@ -251,6 +359,11 @@ const Home = ({ renderer }) => {
               if (renderer) {
                 renderer.onSectionVisible(6);
               }
+              // 触发CTA文本动画
+              setTimeout(() => {
+                animateTextReveal(ctaTitleRef.current, 0);
+                animateTextSlideUp(ctaTextRef.current, 0.5);
+              }, 300);
             },
           },
         }
@@ -314,15 +427,15 @@ const Home = ({ renderer }) => {
       {/* 4️⃣ Introduction Section */}
       <section ref={introRef} className="intro-section">
         <div className="section-content">
-          <h2 className="section-title" data-parallax="0.3">
+          <h2 ref={introTitleRef} className="section-title" data-parallax="0.3">
             创意与技术的融合
           </h2>
           <div className="intro-container">
             <div className="intro-text" data-parallax="0.2">
-              <p>
+              <p ref={(el) => (introTextRefs.current[0] = el)}>
                 我们专注于创造具有未来感的数字体验，将创意设计与前沿技术完美结合，打造令人惊叹的互动网站和数字产品。
               </p>
-              <p>
+              <p ref={(el) => (introTextRefs.current[1] = el)}>
                 通过WebGL、3D动画和沉浸式交互，我们为品牌构建独特的数字身份和难忘的用户体验。
               </p>
             </div>
@@ -336,13 +449,11 @@ const Home = ({ renderer }) => {
       {/* 5️⃣ Feature Section */}
       <section ref={featuresRef} className="features-section">
         <div className="section-content">
-          <h2 className="section-title">我们的核心能力</h2>
+          <h2 ref={featuresTitleRef} className="section-title">我们的核心能力</h2>
           <div className="features-container">
             <div
               ref={(el) => (featureRefs.current[0] = el)}
               className="feature-card"
-              onMouseEnter={() => renderer?.highlightFeature(0)}
-              onMouseLeave={() => renderer?.resetFeature()}
             >
               <div className="feature-icon">
                 <i className="fas fa-vr-cardboard"></i>
@@ -356,8 +467,6 @@ const Home = ({ renderer }) => {
             <div
               ref={(el) => (featureRefs.current[1] = el)}
               className="feature-card"
-              onMouseEnter={() => renderer?.highlightFeature(1)}
-              onMouseLeave={() => renderer?.resetFeature()}
             >
               <div className="feature-icon">
                 <i className="fas fa-paint-brush"></i>
@@ -371,8 +480,6 @@ const Home = ({ renderer }) => {
             <div
               ref={(el) => (featureRefs.current[2] = el)}
               className="feature-card"
-              onMouseEnter={() => renderer?.highlightFeature(2)}
-              onMouseLeave={() => renderer?.resetFeature()}
             >
               <div className="feature-icon">
                 <i className="fas fa-rocket"></i>
@@ -389,13 +496,11 @@ const Home = ({ renderer }) => {
       {/* 🎨 Portfolio Section */}
       <section ref={portfolioRef} className="portfolio-section">
         <div className="section-content">
-          <h2 className="section-title">精选作品</h2>
+          <h2 ref={portfolioTitleRef} className="section-title">精选作品</h2>
           <div className="portfolio-container">
             <div
               ref={(el) => (portfolioRefs.current[0] = el)}
               className="portfolio-item"
-              onMouseEnter={() => renderer?.highlightPortfolio(0)}
-              onMouseLeave={() => renderer?.resetPortfolio()}
             >
               <div className="portfolio-image">
                 <div className="image-overlay"></div>
@@ -410,8 +515,6 @@ const Home = ({ renderer }) => {
             <div
               ref={(el) => (portfolioRefs.current[1] = el)}
               className="portfolio-item"
-              onMouseEnter={() => renderer?.highlightPortfolio(1)}
-              onMouseLeave={() => renderer?.resetPortfolio()}
             >
               <div className="portfolio-image">
                 <div className="image-overlay"></div>
@@ -426,8 +529,6 @@ const Home = ({ renderer }) => {
             <div
               ref={(el) => (portfolioRefs.current[2] = el)}
               className="portfolio-item"
-              onMouseEnter={() => renderer?.highlightPortfolio(2)}
-              onMouseLeave={() => renderer?.resetPortfolio()}
             >
               <div className="portfolio-image">
                 <div className="image-overlay"></div>
@@ -445,7 +546,7 @@ const Home = ({ renderer }) => {
       {/* 🛠️ Technology Stack Section */}
       <section ref={techRef} className="tech-section">
         <div className="section-content">
-          <h2 className="section-title">技术栈</h2>
+          <h2 ref={techTitleRef} className="section-title">技术栈</h2>
           <div className="tech-container">
             <div className="tech-category">
               <h3>前端框架</h3>
@@ -534,7 +635,7 @@ const Home = ({ renderer }) => {
       {/*  Team Section */}
       <section ref={teamRef} className="team-section">
         <div className="section-content">
-          <h2 className="section-title">创意团队</h2>
+          <h2 ref={teamTitleRef} className="section-title">创意团队</h2>
           <div className="team-container">
             <div
               ref={(el) => (teamRefs.current[0] = el)}
@@ -578,8 +679,8 @@ const Home = ({ renderer }) => {
       {/* 6️⃣ Call To Action Section */}
       <section ref={ctaSectionRef} className="cta-section">
         <div className="section-content">
-          <h2 className="cta-title">准备好开始您的项目了吗？</h2>
-          <p className="cta-text">让我们一起创造令人惊叹的数字体验</p>
+          <h2 ref={ctaTitleRef} className="cta-title">准备好开始您的项目了吗？</h2>
+          <p ref={ctaTextRef} className="cta-text">让我们一起创造令人惊叹的数字体验</p>
           <button className="cta-button cta-button-large">开始项目</button>
         </div>
       </section>
