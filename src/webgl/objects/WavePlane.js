@@ -177,59 +177,140 @@ class WavePlane {
     window.addEventListener('touchstart', this.handleMouseDown)
     window.addEventListener('touchend', this.handleMouseUp)
     
+    // 新增：入场动画状态
+    this.isEntranceComplete = false;
+    this.entranceProgress = 0;
+    
     this.init()
+    
+    // 启动入场动画
+    this.startEntranceAnimation();
   }
   
-  init() {
+  // 新增：入场动画方法
+  startEntranceAnimation() {
     try {
-      console.log('初始化WavePlane...');
+      console.log('开始入场动画...');
       
-      // 创建平面几何体 - 减少细分以提高性能
-      this.geometry = new THREE.PlaneGeometry(4, 3, 32, 32)
+      // 初始状态：完全透明，无波动
+      if (this.material && this.material.uniforms) {
+        this.material.uniforms.uColorIntensity.value = 0;
+        this.material.uniforms.uWaveAmplitude.value = 0;
+        this.material.uniforms.uNoiseStrength.value = 0;
+      }
       
-      // 创建着色器材质 - 使用简化的着色器
-      this.material = new THREE.ShaderMaterial({
-        vertexShader,
-        fragmentShader,
-        uniforms: {
-          uTime: { value: 0 },
-          uMouse: { value: new THREE.Vector2(0, 0) },
-          uScroll: { value: 0 },
-          uWaveAmplitude: { value: this.params.waveAmplitude },
-          uWaveFrequency: { value: this.params.waveFrequency },
-          uNoiseStrength: { value: this.params.noiseStrength },
-          uNoiseScale: { value: this.params.noiseScale },
-          uColorIntensity: { value: this.params.colorIntensity },
-          uMouseStrength: { value: this.params.mouseStrength },
-          uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) }
-        },
-        side: THREE.DoubleSide,
-        transparent: true,
-        wireframe: false
-      })
+      // 网格初始缩放为0
+      if (this.mesh) {
+        this.mesh.scale.set(0, 0, 0);
+        this.mesh.rotation.z = Math.PI;
+      }
       
-      // 创建网格
-      this.mesh = new THREE.Mesh(this.geometry, this.material)
-      console.log('WavePlane初始化完成');
+      // 创建入场动画时间线
+      const entranceTl = gsap.timeline({
+        onComplete: () => {
+          this.isEntranceComplete = true;
+          console.log('入场动画完成');
+        }
+      });
+      
+      // 第一阶段：网格缩放和旋转入场 (0-1.5s)
+      entranceTl.to(this.mesh.scale, {
+        x: 1,
+        y: 1,
+        z: 1,
+        duration: 1.5,
+        ease: 'elastic.out(1, 0.5)'
+      }, 0);
+      
+      entranceTl.to(this.mesh.rotation, {
+        z: 0,
+        duration: 1.5,
+        ease: 'power2.out'
+      }, 0);
+      
+      // 第二阶段：材质透明度渐入 (0.5-2s)
+      if (this.material && this.material.uniforms) {
+        entranceTl.to(this.material.uniforms.uColorIntensity, {
+          value: this.params.colorIntensity,
+          duration: 1.5,
+          ease: 'power2.out'
+        }, 0.5);
+        
+        // 第三阶段：波浪效果逐渐激活 (1-3s)
+        entranceTl.to(this.material.uniforms.uWaveAmplitude, {
+          value: this.params.waveAmplitude,
+          duration: 2,
+          ease: 'elastic.out(1, 0.3)'
+        }, 1);
+        
+        entranceTl.to(this.material.uniforms.uNoiseStrength, {
+          value: this.params.noiseStrength,
+          duration: 2,
+          ease: 'power2.out'
+        }, 1.2);
+        
+        // 第四阶段：添加入场波纹效果 (2-4s)
+        entranceTl.call(() => {
+          this.addEntranceRipples();
+        }, null, 2);
+      }
+      
+      // 更新入场进度
+      entranceTl.to(this, {
+        entranceProgress: 1,
+        duration: 3,
+        ease: 'none'
+      }, 0);
+      
     } catch (error) {
-      console.error('WavePlane初始化错误:', error);
-      // 创建一个简单的备用平面 - 使用基本材质
-      this.geometry = new THREE.PlaneGeometry(4, 3)
-      this.material = new THREE.MeshBasicMaterial({ 
-        color: 0x0055ff, 
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 0.7
-      })
-      this.mesh = new THREE.Mesh(this.geometry, this.material)
-      console.log('使用备用平面');
+      console.error('入场动画启动失败:', error);
+      // 如果动画失败，直接设置为完成状态
+      this.isEntranceComplete = true;
+      this.entranceProgress = 1;
     }
   }
   
+  // 新增：入场波纹效果
+  addEntranceRipples() {
+    try {
+      if (!this.material || !this.material.uniforms) return;
+      
+      // 创建多个波纹效果
+      const rippleCount = 3;
+      
+      for (let i = 0; i < rippleCount; i++) {
+        setTimeout(() => {
+          // 临时增加波浪参数
+          const currentFreq = this.material.uniforms.uWaveFrequency.value;
+          const currentAmp = this.material.uniforms.uWaveAmplitude.value;
+          
+          gsap.to(this.material.uniforms.uWaveFrequency, {
+            value: currentFreq * (2 + i * 0.5),
+            duration: 0.4,
+            ease: 'power2.out',
+            yoyo: true,
+            repeat: 1
+          });
+          
+          gsap.to(this.material.uniforms.uWaveAmplitude, {
+            value: currentAmp * (1.5 + i * 0.3),
+            duration: 0.4,
+            ease: 'power2.out',
+            yoyo: true,
+            repeat: 1
+          });
+        }, i * 600);
+      }
+    } catch (error) {
+      console.error('入场波纹效果失败:', error);
+    }
+  }
+  
+  // 增强现有的update方法
   update() {
     try {
       // 更新时间
-      this.time += 0.01
+      this.time += 0.01;
       
       // 检查材质和uniforms是否存在
       if (!this.material || !this.material.uniforms) {
@@ -238,140 +319,200 @@ class WavePlane {
       
       // 更新时间uniform
       if (this.material.uniforms.uTime) {
-        this.material.uniforms.uTime.value = this.time
+        this.material.uniforms.uTime.value = this.time;
+      }
+      
+      // 如果入场动画未完成，添加额外的动态效果
+      if (!this.isEntranceComplete) {
+        this.updateEntranceEffects();
       }
       
       // 计算鼠标速度
-      this.mouseVelocity.x = this.targetMouse.x - this.lastMouse.x
-      this.mouseVelocity.y = this.targetMouse.y - this.lastMouse.y
-      this.lastMouse.x = this.targetMouse.x
-      this.lastMouse.y = this.targetMouse.y
+      this.mouseVelocity.x = this.targetMouse.x - this.lastMouse.x;
+      this.mouseVelocity.y = this.targetMouse.y - this.lastMouse.y;
+      this.lastMouse.x = this.targetMouse.x;
+      this.lastMouse.y = this.targetMouse.y;
       
       // 平滑过渡鼠标位置 - 根据鼠标按下状态调整跟随速度
-      const followSpeed = this.isMouseDown ? 0.2 : 0.1
-      this.mouse.x += (this.targetMouse.x - this.mouse.x) * followSpeed
-      this.mouse.y += (this.targetMouse.y - this.mouse.y) * followSpeed
+      const followSpeed = this.isMouseDown ? 0.2 : 0.1;
+      this.mouse.x += (this.targetMouse.x - this.mouse.x) * followSpeed;
+      this.mouse.y += (this.targetMouse.y - this.mouse.y) * followSpeed;
       
       // 更新鼠标uniform
       if (this.material.uniforms.uMouse) {
-        this.material.uniforms.uMouse.value = this.mouse
+        this.material.uniforms.uMouse.value = this.mouse;
       }
       
       // 平滑过渡滚动位置
-      this.scrollY += (this.targetScrollY - this.scrollY) * 0.1
+      this.scrollY += (this.targetScrollY - this.scrollY) * 0.1;
       
       // 更新滚动uniform
       if (this.material.uniforms.uScroll) {
-        this.material.uniforms.uScroll.value = this.scrollY
+        this.material.uniforms.uScroll.value = this.scrollY;
       }
       
-      // 根据鼠标速度动态调整波浪参数
-      const mouseSpeed = Math.sqrt(this.mouseVelocity.x * this.mouseVelocity.x + this.mouseVelocity.y * this.mouseVelocity.y)
+      // 增强鼠标速度响应
+      const mouseSpeed = Math.sqrt(this.mouseVelocity.x * this.mouseVelocity.x + this.mouseVelocity.y * this.mouseVelocity.y);
       if (mouseSpeed > 0.01) {
-        // 临时增加波浪振幅
-        const tempAmplitude = Math.min(0.2, this.params.waveAmplitude + mouseSpeed * 0.5)
-        this.material.uniforms.uWaveAmplitude.value = tempAmplitude
-        
-        // 2秒后恢复正常
-        setTimeout(() => {
-          if (this.material && this.material.uniforms) {
-            gsap.to(this.material.uniforms.uWaveAmplitude, {
-              value: this.params.waveAmplitude,
-              duration: 1.0,
-              ease: 'power2.out'
-            })
-          }
-        }, 200)
+        this.addDynamicMouseResponse(mouseSpeed);
       }
+      
     } catch (error) {
       console.error('WavePlane更新错误:', error);
     }
   }
   
-  updateMouse(mouse) {
-    this.targetMouse.x = mouse.x
-    this.targetMouse.y = mouse.y
-    
-    // 如果鼠标移动速度很快，添加额外的波动效果
-    const mouseSpeed = Math.sqrt(
-      (mouse.x - this.lastMouse.x) * (mouse.x - this.lastMouse.x) + 
-      (mouse.y - this.lastMouse.y) * (mouse.y - this.lastMouse.y)
-    )
-    
-    if (mouseSpeed > 0.05) {
-      this.addRippleEffect()
-    }
-  }
-  
-  // 添加鼠标按下/抬起处理
-  handleMouseDown() {
-    this.isMouseDown = true
-    
-    // 鼠标按下时增加鼠标强度
-    if (this.material && this.material.uniforms && this.material.uniforms.uMouseStrength) {
-      gsap.to(this.material.uniforms.uMouseStrength, {
-        value: this.params.mouseStrength * 2.5,
-        duration: 0.5,
-        ease: 'power2.out'
-      })
-    }
-    
-    // 添加波纹效果
-    this.addRippleEffect()
-  }
-  
-  handleMouseUp() {
-    this.isMouseDown = false
-    
-    // 鼠标抬起时恢复鼠标强度
-    if (this.material && this.material.uniforms && this.material.uniforms.uMouseStrength) {
-      gsap.to(this.material.uniforms.uMouseStrength, {
-        value: this.params.mouseStrength,
-        duration: 1.0,
-        ease: 'power2.out'
-      })
-    }
-  }
-  
-  // 添加波纹效果
-  addRippleEffect() {
+  // 新增：入场动画期间的额外效果
+  updateEntranceEffects() {
     try {
-      // 临时增加波浪频率和振幅
-      if (this.material && this.material.uniforms) {
-        // 保存当前值
-        const currentFreq = this.material.uniforms.uWaveFrequency.value
-        const currentAmp = this.material.uniforms.uWaveAmplitude.value
-        
-        // 快速增加值
-        gsap.to(this.material.uniforms.uWaveFrequency, {
-          value: currentFreq * 1.5,
-          duration: 0.3,
-          ease: 'power2.in',
-          onComplete: () => {
-            // 然后缓慢恢复
-            gsap.to(this.material.uniforms.uWaveFrequency, {
-              value: this.params.waveFrequency,
-              duration: 1.5,
-              ease: 'elastic.out(1, 0.3)'
-            })
-          }
-        })
-        
-        gsap.to(this.material.uniforms.uWaveAmplitude, {
-          value: currentAmp * 2,
-          duration: 0.3,
-          ease: 'power2.in',
-          onComplete: () => {
-            gsap.to(this.material.uniforms.uWaveAmplitude, {
-              value: this.params.waveAmplitude,
-              duration: 1.5,
-              ease: 'elastic.out(1, 0.3)'
-            })
-          }
-        })
+      if (!this.material || !this.material.uniforms) return;
+      
+      // 基于入场进度添加动态颜色变化
+      const colorPulse = Math.sin(this.time * 2) * 0.1 * (1 - this.entranceProgress);
+      const currentIntensity = this.material.uniforms.uColorIntensity.value;
+      
+      if (currentIntensity > 0) {
+        this.material.uniforms.uColorIntensity.value = Math.max(0, currentIntensity + colorPulse);
+      }
+      
+      // 添加轻微的旋转效果
+      if (this.mesh && this.entranceProgress < 1) {
+        this.mesh.rotation.y = Math.sin(this.time * 0.5) * 0.1 * (1 - this.entranceProgress);
       }
     } catch (error) {
-      console.error('添加波纹效果时出错:', error);
+      console.error('入场效果更新失败:', error);
+    }
+  }
+  
+  // 新增：增强的鼠标响应
+  addDynamicMouseResponse(mouseSpeed) {
+    try {
+      if (!this.material || !this.material.uniforms) return;
+      
+      // 根据鼠标速度动态调整多个参数
+      const speedMultiplier = Math.min(mouseSpeed * 10, 2);
+      
+      // 临时增加波浪振幅
+      const tempAmplitude = Math.min(0.3, this.params.waveAmplitude + speedMultiplier * 0.1);
+      this.material.uniforms.uWaveAmplitude.value = tempAmplitude;
+      
+      // 临时增加颜色强度
+      const tempColorIntensity = Math.min(1.5, this.params.colorIntensity + speedMultiplier * 0.2);
+      this.material.uniforms.uColorIntensity.value = tempColorIntensity;
+      
+      // 恢复动画
+      setTimeout(() => {
+        if (this.material && this.material.uniforms) {
+          gsap.to(this.material.uniforms.uWaveAmplitude, {
+            value: this.params.waveAmplitude,
+            duration: 1.0,
+            ease: 'power2.out'
+          });
+          
+          gsap.to(this.material.uniforms.uColorIntensity, {
+            value: this.params.colorIntensity,
+            duration: 1.0,
+            ease: 'power2.out'
+          });
+        }
+      }, 200);
+    } catch (error) {
+      console.error('动态鼠标响应失败:', error);
+    }
+  }
+  
+  // 增强现有的handleMouseDown方法
+  handleMouseDown() {
+    this.isMouseDown = true;
+    
+    // 鼠标按下时的增强效果
+    if (this.material && this.material.uniforms && this.material.uniforms.uMouseStrength) {
+      gsap.to(this.material.uniforms.uMouseStrength, {
+        value: this.params.mouseStrength * 3,
+        duration: 0.3,
+        ease: 'power2.out'
+      });
+      
+      // 同时增加颜色强度
+      gsap.to(this.material.uniforms.uColorIntensity, {
+        value: this.params.colorIntensity * 1.3,
+        duration: 0.3,
+        ease: 'power2.out'
+      });
+    }
+    
+    // 添加强烈的波纹效果
+    this.addIntenseRippleEffect();
+  }
+  
+  // 增强现有的handleMouseUp方法
+  handleMouseUp() {
+    this.isMouseDown = false;
+    
+    // 鼠标抬起时的恢复效果
+    if (this.material && this.material.uniforms) {
+      gsap.to(this.material.uniforms.uMouseStrength, {
+        value: this.params.mouseStrength,
+        duration: 1.2,
+        ease: 'elastic.out(1, 0.3)'
+      });
+      
+      gsap.to(this.material.uniforms.uColorIntensity, {
+        value: this.params.colorIntensity,
+        duration: 1.2,
+        ease: 'elastic.out(1, 0.3)'
+      });
+    }
+  }
+  
+  // 新增：强烈波纹效果
+  addIntenseRippleEffect() {
+    try {
+      if (!this.material || !this.material.uniforms) return;
+      
+      // 创建强烈的波纹动画
+      const timeline = gsap.timeline();
+      
+      // 快速增加所有波浪参数
+      timeline.to(this.material.uniforms.uWaveFrequency, {
+        value: this.params.waveFrequency * 2.5,
+        duration: 0.2,
+        ease: 'power2.out'
+      }, 0);
+      
+      timeline.to(this.material.uniforms.uWaveAmplitude, {
+        value: this.params.waveAmplitude * 3,
+        duration: 0.2,
+        ease: 'power2.out'
+      }, 0);
+      
+      timeline.to(this.material.uniforms.uNoiseStrength, {
+        value: this.params.noiseStrength * 2,
+        duration: 0.2,
+        ease: 'power2.out'
+      }, 0);
+      
+      // 然后弹性恢复
+      timeline.to(this.material.uniforms.uWaveFrequency, {
+        value: this.params.waveFrequency,
+        duration: 1.5,
+        ease: 'elastic.out(1, 0.4)'
+      }, 0.2);
+      
+      timeline.to(this.material.uniforms.uWaveAmplitude, {
+        value: this.params.waveAmplitude,
+        duration: 1.5,
+        ease: 'elastic.out(1, 0.4)'
+      }, 0.2);
+      
+      timeline.to(this.material.uniforms.uNoiseStrength, {
+        value: this.params.noiseStrength,
+        duration: 1.5,
+        ease: 'elastic.out(1, 0.4)'
+      }, 0.2);
+      
+    } catch (error) {
+      console.error('强烈波纹效果失败:', error);
     }
   }
   

@@ -429,6 +429,22 @@ class Renderer {
       console.error('清理渲染器资源时出错:', error);
     }
   }
+  
+  // 新增：触发入场动画
+  triggerEntranceAnimation() {
+    if (this.wavePlane && typeof this.wavePlane.startEntranceAnimation === 'function') {
+      this.wavePlane.startEntranceAnimation();
+    }
+  }
+  
+  // 新增：重置并重新播放入场动画
+  resetAndReplayEntrance() {
+    if (this.wavePlane) {
+      this.wavePlane.isEntranceComplete = false;
+      this.wavePlane.entranceProgress = 0;
+      this.wavePlane.startEntranceAnimation();
+    }
+  }
 }
 
 export default Renderer

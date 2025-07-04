@@ -9,6 +9,7 @@ gsap.registerPlugin(ScrollTrigger, TextPlugin, Flip);
 const Home = ({ renderer }) => {
   const homeRef = useRef(null);
   const heroRef = useRef(null);
+  const hero3DRef = useRef(null); // 新增：3D场景容器引用
   const titleRef = useRef(null);
   const subtitleRef = useRef(null);
   const ctaRef = useRef(null);
@@ -35,6 +36,10 @@ const Home = ({ renderer }) => {
 
   // 鼠标位置状态
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  // 新增：3D场景相关状态
+  const [hero3DScene, setHero3DScene] = useState(null);
+  const [isHero3DLoaded, setIsHero3DLoaded] = useState(false);
 
   // Flip 动画状态
   const [isFlipActive, setIsFlipActive] = useState(false);
@@ -190,6 +195,147 @@ const Home = ({ renderer }) => {
     });
   };
 
+  // 新增：初始化Hero区域的3D场景
+  const initHero3DScene = async () => {
+    try {
+      const container = hero3DRef.current;
+      if (!container) return;
+
+      // 动态导入Three.js
+      const THREE = await import('three');
+      
+      // 创建场景
+      const scene = new THREE.Scene();
+      
+      // 创建相机
+      const camera = new THREE.PerspectiveCamera(
+        75,
+        container.clientWidth / container.clientHeight,
+        0.1,
+        1000
+      );
+      camera.position.z = 5;
+      
+      // 创建渲染器
+      const renderer = new THREE.WebGLRenderer({ 
+        alpha: true, 
+        antialias: true 
+      });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setClearColor(0x000000, 0); // 透明背景
+      container.appendChild(renderer.domElement);
+      
+      // 创建几何体 - 浮动的粒子群
+      const particleCount = 200;
+      const particles = new THREE.BufferGeometry();
+      const positions = new Float32Array(particleCount * 3);
+      const colors = new Float32Array(particleCount * 3);
+      
+      for (let i = 0; i < particleCount * 3; i += 3) {
+        // 随机位置
+        positions[i] = (Math.random() - 0.5) * 20;
+        positions[i + 1] = (Math.random() - 0.5) * 20;
+        positions[i + 2] = (Math.random() - 0.5) * 20;
+        
+        // 渐变颜色
+        colors[i] = Math.random() * 0.5 + 0.5; // R
+        colors[i + 1] = Math.random() * 0.3 + 0.7; // G
+        colors[i + 2] = 1; // B
+      }
+      
+      particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      particles.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      
+      // 粒子材质
+      const particleMaterial = new THREE.PointsMaterial({
+        size: 0.1,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.8,
+        blending: THREE.AdditiveBlending
+      });
+      
+      const particleSystem = new THREE.Points(particles, particleMaterial);
+      scene.add(particleSystem);
+      
+      // 创建主要几何体 - 旋转的环形
+      const torusGeometry = new THREE.TorusGeometry(2, 0.3, 16, 100);
+      const torusMaterial = new THREE.MeshBasicMaterial({
+        color: 0x00ffaa,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.6
+      });
+      const torus = new THREE.Mesh(torusGeometry, torusMaterial);
+      scene.add(torus);
+      
+      // 添加环境光
+      const ambientLight = new THREE.AmbientLight(0x404040, 0.4);
+      scene.add(ambientLight);
+      
+      // 添加点光源
+      const pointLight = new THREE.PointLight(0x00ffaa, 1, 100);
+      pointLight.position.set(10, 10, 10);
+      scene.add(pointLight);
+      
+      // 动画循环
+      const animate = () => {
+        requestAnimationFrame(animate);
+        
+        // 旋转环形
+        torus.rotation.x += 0.01;
+        torus.rotation.y += 0.005;
+        
+        // 粒子动画
+        const positions = particleSystem.geometry.attributes.position.array;
+        for (let i = 0; i < positions.length; i += 3) {
+          positions[i + 1] += Math.sin(Date.now() * 0.001 + positions[i]) * 0.01;
+        }
+        particleSystem.geometry.attributes.position.needsUpdate = true;
+        
+        // 相机轻微摆动
+        camera.position.x = Math.sin(Date.now() * 0.0005) * 0.5;
+        camera.position.y = Math.cos(Date.now() * 0.0003) * 0.3;
+        camera.lookAt(scene.position);
+        
+        renderer.render(scene, camera);
+      };
+      
+      animate();
+      
+      // 响应式处理
+      const handleResize = () => {
+        const width = container.clientWidth;
+        const height = container.clientHeight;
+        
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(width, height);
+      };
+      
+      window.addEventListener('resize', handleResize);
+      
+      // 保存场景引用
+      setHero3DScene({
+        scene,
+        camera,
+        renderer,
+        torus,
+        particleSystem,
+        cleanup: () => {
+          window.removeEventListener('resize', handleResize);
+          container.removeChild(renderer.domElement);
+          renderer.dispose();
+        }
+      });
+      
+      setIsHero3DLoaded(true);
+      
+    } catch (error) {
+      console.error('Hero 3D场景初始化失败:', error);
+    }
+  };
+
   // 手动触发作品部分动画
   const triggerPortfolioAnimation = () => {
     if (portfolioRefs.current && portfolioTitleRef.current) {
@@ -237,6 +383,9 @@ const Home = ({ renderer }) => {
   };
 
   useEffect(() => {
+    // 初始化3D场景
+    initHero3DScene();
+    
     // 添加鼠标移动事件监听器
     window.addEventListener("mousemove", handleMouseMove);
 
@@ -594,6 +743,10 @@ const Home = ({ renderer }) => {
     }
 
     return () => {
+      if (hero3DScene) {
+        hero3DScene.cleanup();
+      }
+      
       // 清理事件监听器
       window.removeEventListener("mousemove", handleMouseMove);
 
@@ -620,7 +773,22 @@ const Home = ({ renderer }) => {
     <div ref={homeRef} className="page home-page">
       {/* 1️⃣ Hero Section */}
       <section ref={heroRef} className="hero-section">
-        <div className="hero-content">
+        {/* 3D背景容器 */}
+        <div 
+          ref={hero3DRef} 
+          className="hero-3d-background"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            zIndex: 1,
+            pointerEvents: 'none'
+          }}
+        />
+        
+        <div className="hero-content" style={{ position: 'relative', zIndex: 2 }}>
           <h1 ref={titleRef} className="hero-title">
             Rendered Just For You
           </h1>
@@ -657,8 +825,22 @@ const Home = ({ renderer }) => {
           </div>
         </div>
 
+        {/* 3D交互提示 */}
+        {isHero3DLoaded && (
+          <div className="hero-3d-hint" style={{
+            position: 'absolute',
+            bottom: '100px',
+            right: '20px',
+            color: 'rgba(255,255,255,0.7)',
+            fontSize: '12px',
+            zIndex: 3
+          }}>
+            3D场景正在运行
+          </div>
+        )}
+
         {/* 3️⃣ Scroll Down 提示 */}
-        <div ref={scrollIndicatorRef} className="scroll-indicator">
+        <div ref={scrollIndicatorRef} className="scroll-indicator" style={{ zIndex: 2 }}>
           <span>向下滚动</span>
           <div className="scroll-arrow">↓</div>
         </div>
